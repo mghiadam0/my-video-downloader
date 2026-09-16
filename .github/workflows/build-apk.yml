@@ -8,6 +8,15 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
+      - name: Verify files exist
+        run: |
+          echo "=== Files in repo ==="
+          ls -la
+          echo "=== buildozer.spec content ==="
+          cat buildozer.spec
+          echo "=== main.py head ==="
+          head -20 main.py
+
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
@@ -19,30 +28,10 @@ jobs:
           sudo apt-get install -y git zip unzip openjdk-17-jdk python3-pip autoconf libtool pkg-config zlib1g-dev libncurses5-dev libncursesw5-dev libtinfo5 cmake libffi-dev libssl-dev
 
       - name: Install Buildozer
-        run: pip install buildozer==1.5.0
-
-      - name: Build APK
         run: |
-          set -o pipefail
-          buildozer android debug 2>&1 | tee build.log || true
+          pip install buildozer==1.5.0
+          buildozer --version
 
-      - name: Show errors
-        if: always()
+      - name: Run Buildozer
         run: |
-          echo "=========== آخر 150 سطر من السجل ==========="
-          tail -150 build.log
-          echo "=========== البحث عن أخطاء ==========="
-          grep -i "error\|exception\|failed\|traceback" build.log | tail -30 || echo "لا أخطاء واضحة"
-
-      - name: Check bin folder
-        if: always()
-        run: |
-          ls -la bin/ 2>/dev/null || echo "مجلد bin غير موجود"
-
-      - name: Upload APK
-        if: success()
-        uses: actions/upload-artifact@v4
-        with:
-          name: my-app-apk
-          path: bin/*.apk
-          if-no-files-found: warn
+          buildozer android debug
