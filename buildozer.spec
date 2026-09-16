@@ -8,7 +8,8 @@ source.include_exts = py,png,jpg,kv,atlas
 
 version = 0.1
 
-requirements = python3,kivy,requests,urllib3,certifi,chardet,idna
+# استخدام kivy بدون تحديد نسخة ليجرب buildozer الإصدار المتوافق
+requirements = python3,kivy==2.2.1,yt-dlp,requests,urllib3,certifi,chardet,idna
 
 orientation = portrait
 fullscreen = 0
