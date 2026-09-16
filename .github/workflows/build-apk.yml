@@ -2,42 +2,22 @@ name: Build Kivy APK
 on: [push, workflow_dispatch]
 
 jobs:
-  build:
+  build-android:
     runs-on: ubuntu-22.04
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Set up Python
-        uses: actions/setup-python@v5
+      - name: Build with Buildozer
+        uses: ArtemSBulgakov/buildozer-action@v1
+        id: buildozer
         with:
-          python-version: '3.9'
-
-      - name: Install system dependencies
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y git zip unzip openjdk-17-jdk python3-pip autoconf libtool pkg-config zlib1g-dev libncurses5-dev libncursesw5-dev libtinfo5 cmake libffi-dev libssl-dev
-
-      - name: Install Buildozer
-        run: pip install buildozer
-
-      - name: Build APK
-        run: |
-          buildozer android debug 2>&1 | tee build.log
-          echo "=== Checking bin folder ==="
-          ls -la bin/ || echo "bin folder not found"
-          exit ${PIPESTATUS[0]}
-
-      - name: Show last errors if failed
-        if: failure()
-        run: |
-          echo "=== LAST 100 LINES OF BUILD LOG ==="
-          tail -100 build.log
+          command: android debug
+          buildozer_version: stable
 
       - name: Upload APK
-        if: success()
         uses: actions/upload-artifact@v4
         with:
           name: my-app-apk
-          path: bin/*.apk
+          path: ${{ steps.buildozer.outputs.filename }}
           if-no-files-found: error
